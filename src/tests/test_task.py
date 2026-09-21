@@ -1,4 +1,6 @@
 from base.task import Task
+from base.scheduler import Scheduler
+from base.worker import Worker
 import pytest
 
 def test_add_task():
@@ -7,9 +9,14 @@ def test_add_task():
         function="add"   
     )
     
-    assert task.state == "PENDING"
-    task.execute_task()
-    assert task.state == "SUCCESS"
+    assert task.get_state() == "PENDING"
+    scheduler = Scheduler()
+    worker = Worker()
+    
+    scheduler.submit_task(task)
+    worker.execute_task(scheduler.task_queue.popleft())
+    
+    assert task.get_state() == "SUCCESS"
     assert task.task_out == 3
 
 def test_sub_task():
@@ -20,7 +27,12 @@ def test_sub_task():
 
     assert task.get_state() == "PENDING"
 
-    task.execute_task()
+    scheduler = Scheduler()
+    worker = Worker()
+    
+    scheduler.submit_task(task)
+    worker.execute_task(scheduler.task_queue.popleft())
+        
 
     assert task.get_state() == "SUCCESS"
     assert task.get_out() == 5
@@ -32,9 +44,14 @@ def test_unknown_function():
     )
 
     assert task.get_state() == "PENDING"
+    
+    scheduler = Scheduler()
+    worker = Worker()
+    
+    scheduler.submit_task(task)
 
     with pytest.raises(ValueError):
-        task.execute_task()
+        worker.execute_task(scheduler.task_queue.popleft())
 
     assert task.get_state() == "FAILED"
     
@@ -65,6 +82,27 @@ def test_valid_file():
         src_file="src/modules/echo.py"
     )
     
-    task.execute_task()
-    print(task.task_out)
-    assert task.task_out == {"a": 10}
+    scheduler = Scheduler()
+    worker = Worker()
+    
+    scheduler.submit_task(task)
+    worker.execute_task(scheduler.task_queue.popleft())
+    assert task.get_state() == "SUCCESS"
+    assert task.get_out() == {"a": 10}
+    
+def test_task_cannot_execute_twice():
+    task = Task(
+        inputs={"a": 1, "b": 2},
+        function="add"
+    )
+
+    scheduler = Scheduler()
+    worker = Worker()
+    
+    scheduler.submit_task(task)
+    worker.execute_task(scheduler.task_queue.popleft())
+
+    with pytest.raises(ValueError):
+        worker.execute_task(task)
+
+    assert task.get_state() == "SUCCESS"
