@@ -21,7 +21,6 @@ def test_failure_retry_lifecycle():
     sm.change_state("QUEUED")
     sm.change_state("RUNNING")
     sm.change_state("FAILED")
-    sm.change_state("RETRY")
     sm.change_state("QUEUED")
 
     assert sm.get_state() == "QUEUED"
@@ -32,7 +31,6 @@ def test_timeout_retry_lifecycle():
     sm.change_state("QUEUED")
     sm.change_state("RUNNING")
     sm.change_state("TIMEOUT")
-    sm.change_state("RETRY")
     sm.change_state("QUEUED")
 
     assert sm.get_state() == "QUEUED"

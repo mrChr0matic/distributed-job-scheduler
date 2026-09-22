@@ -2,6 +2,8 @@ from base.task import Task
 from base.scheduler import Scheduler
 from base.worker import Worker
 import pytest
+from multiprocessing import Queue
+
 
 def test_add_task():
     task = Task(
@@ -14,6 +16,7 @@ def test_add_task():
     worker = Worker()
     
     scheduler.submit_task(task)
+    scheduler.enqueue_ready_tasks()
     worker.execute_task(scheduler.task_queue.popleft())
     
     assert task.get_state() == "SUCCESS"
@@ -31,6 +34,7 @@ def test_sub_task():
     worker = Worker()
     
     scheduler.submit_task(task)
+    scheduler.enqueue_ready_tasks()
     worker.execute_task(scheduler.task_queue.popleft())
         
 
@@ -49,6 +53,7 @@ def test_unknown_function():
     worker = Worker()
     
     scheduler.submit_task(task)
+    scheduler.enqueue_ready_tasks()
 
     with pytest.raises(ValueError):
         worker.execute_task(scheduler.task_queue.popleft())
@@ -86,6 +91,8 @@ def test_valid_file():
     worker = Worker()
     
     scheduler.submit_task(task)
+    scheduler.enqueue_ready_tasks()
+    
     worker.execute_task(scheduler.task_queue.popleft())
     assert task.get_state() == "SUCCESS"
     assert task.get_out() == {"a": 10}
@@ -100,9 +107,27 @@ def test_task_cannot_execute_twice():
     worker = Worker()
     
     scheduler.submit_task(task)
+    scheduler.enqueue_ready_tasks()
+    
     worker.execute_task(scheduler.task_queue.popleft())
 
     with pytest.raises(ValueError):
         worker.execute_task(task)
 
     assert task.get_state() == "SUCCESS"
+    
+def test_task_can_be_serialized():
+    task = Task(
+        inputs={"a": 1, "b": 2},
+        function="add"
+    )
+
+    queue = Queue()
+    queue.put(task)
+
+    received_task = queue.get()
+
+    assert received_task.task_id == task.task_id
+    assert received_task.inputs == task.inputs
+    assert received_task.function == task.function
+    assert received_task.get_state() == "PENDING"

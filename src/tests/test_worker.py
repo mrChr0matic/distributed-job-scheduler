@@ -1,6 +1,7 @@
 import pytest
 from base.task import Task
 from base.worker import Worker
+from multiprocessing import Process, Queue
 
 def test_worker_executes_task():
     task = Task(
@@ -81,3 +82,39 @@ def test_worker_with_module():
     worker.execute_task(task)
     assert task.get_state() == "SUCCESS"
     assert task.get_out() == {"a": 10}
+    
+def worker_process(task_queue, result_queue):
+    worker = Worker()
+
+    task = task_queue.get()
+
+    worker.execute_task(task)
+
+    result_queue.put(task)
+
+def test_worker_process_executes_task():
+    task_queue = Queue()
+    result_queue = Queue()
+
+    task = Task(
+        inputs={"a": 1, "b": 2},
+        function="add"
+    )
+
+    process = Process(
+        target=worker_process,
+        args=(task_queue, result_queue)
+    )
+
+    process.start()
+
+    task.state_machine.change_state("QUEUED")
+    task_queue.put(task)
+
+    result = result_queue.get()
+
+    process.join()
+
+    assert result.task_id == task.task_id
+    assert result.get_state() == "SUCCESS"
+    assert result.task_out == 3

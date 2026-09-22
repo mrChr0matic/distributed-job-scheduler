@@ -44,10 +44,11 @@ class Worker:
                 out = func_map.get(task.function)(**task.inputs)
             task.state_machine.change_state('SUCCESS')
             task.task_out = out
-            return task.state_machine.get_state()
         
         except Exception as e:
             print(f"{task.task_id} failed with error {repr(e)}")
             task.state_machine.change_state('FAILED')
             raise
+        return task.state_machine.get_state()
+        
             
