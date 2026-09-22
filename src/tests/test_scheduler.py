@@ -1,8 +1,8 @@
 import pytest
 import time
-from base.task import Task
-from base.scheduler import Scheduler
-from base.worker import Worker
+from src.base.task import Task
+from src.base.scheduler import Scheduler
+from src.base.worker import Worker
 
 def test_submit_task():
     task = Task(

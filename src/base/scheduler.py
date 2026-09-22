@@ -1,6 +1,6 @@
 from collections import deque
-from base.worker import Worker
-from base.dag import DAG
+from src.base.worker import Worker
+from src.base.dag import DAG
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def init_workers(worker_count):
@@ -22,6 +22,18 @@ class Scheduler:
     
     def is_running(self):
         return self.running
+    
+    def cancel_task(self, task_id):
+        task = self.task_directory[task_id]
+        if task.get_state() == "PENDING":
+            task.state_machine.change_state("CANCELLED")
+        elif task.get_state() == "QUEUED":
+            task.state_machine.change_state("CANCELLED")
+            self.task_queue.remove(task)
+        elif task.get_state() == "RUNNING":
+            ...
+        else:
+            ...
         
     def submit_task(self, task):
         if task.task_id in self.task_directory:

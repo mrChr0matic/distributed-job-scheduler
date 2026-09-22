@@ -1,5 +1,5 @@
 import pytest
-from base.dag import DAG
+from src.base.dag import DAG
 
 
 def test_add_task():

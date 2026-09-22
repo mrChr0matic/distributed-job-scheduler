@@ -1,4 +1,4 @@
-from base.state_machine import StateMachine
+from src.base.state_machine import StateMachine
 import pytest 
 
 def test_get_states():

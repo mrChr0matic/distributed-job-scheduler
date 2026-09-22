@@ -969,7 +969,7 @@ store result
 return status
 ```
 
-No database.
+No datasrc.base.
 No Redis.
 No Docker.
 

@@ -1,6 +1,6 @@
 import pytest
-from base.task import Task
-from base.worker import Worker
+from src.base..task import Task
+from src.base..worker import Worker
 from multiprocessing import Process, Queue
 
 def test_worker_executes_task():

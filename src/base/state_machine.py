@@ -1,11 +1,11 @@
 VALID_TRANSITIONS = {
-    "PENDING": ["QUEUED"],
-    "QUEUED": ["RUNNING"],
-    "RUNNING": ["SUCCESS", "FAILED", "CANCELLED", "TIMEOUT"],
     "TIMEOUT": ["QUEUED"],
     "FAILED": ["QUEUED"],
     "SUCCESS": [],
     "CANCELLED": [],
+    "PENDING": ["QUEUED", "CANCELLED"],
+    "QUEUED": ["RUNNING", "CANCELLED"],
+    "RUNNING": ["SUCCESS", "FAILED", "CANCELLED", "TIMEOUT"],
 }
 
 class StateMachine:

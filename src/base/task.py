@@ -1,6 +1,6 @@
 import uuid
 from pathlib import Path
-from base.state_machine import StateMachine
+from src.base.state_machine import StateMachine
 
 MAX_RETRY = 2
 
